@@ -10,7 +10,7 @@ public class User {
     private final Scanner reader = new Scanner(System.in);
 
     public void setup() {
-        /* Main setup - used to set the name of the user and port */
+        /* Main setup - used to set the name of the user, port and IP */
         System.out.println("Welcome");
         System.out.println("Please enter your name:");
         this.name = reader.next();
@@ -26,11 +26,12 @@ public class User {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("Setup complete.");
+        System.out.println("Setup complete...");
         this.mainMenu();
     }
 
     public void mainMenu() {
+        Utils.clearTerminal();
         System.out.println("-----Main menu-----");
         System.out.println("1 - Start new chat");
         System.out.println("2 - Join existing chat");
@@ -40,22 +41,32 @@ public class User {
 
         switch (choice) {
             case "1":
+                Utils.clearTerminal();
                 System.out.println("Starting new chat...");
+                this.startNewChat();
                 break;
             case "2":
+                Utils.clearTerminal();
                 System.out.println("Joining existing chat...");
                 break;
             case "3":
+                Utils.clearTerminal();
                 System.out.println("Share this with users to chat with them:");
                 System.out.println(this.ip + ":" + this.port);
                 break;
             case "4":
+                Utils.clearTerminal();
                 System.out.println("Quitting...");
                 System.exit(0);
                 break;
             default:
+                Utils.clearTerminal();
                 System.out.println("Invalid option, ensure you only choose from the numbers 1-4");
                 this.mainMenu();
         }
+    }
+
+    public void startNewChat() {
+
     }
 }
