@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -7,6 +8,7 @@ public class User {
     private String name;
     private String port;
     private String ip;
+    private ServerSocket ss;
     private final Scanner reader = new Scanner(System.in);
 
     public void setup() {
@@ -23,6 +25,9 @@ public class User {
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
             this.ip = in.readLine();
             in.close();
+
+            System.out.println("Starting server...");
+            this.ss = new ServerSocket(Integer.parseInt(this.port));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,7 +48,6 @@ public class User {
             case "1":
                 Utils.clearTerminal();
                 System.out.println("Starting new chat...");
-                this.startNewChat();
                 break;
             case "2":
                 Utils.clearTerminal();
@@ -64,9 +68,5 @@ public class User {
                 System.out.println("Invalid option, ensure you only choose from the numbers 1-4");
                 this.mainMenu();
         }
-    }
-
-    public void startNewChat() {
-
     }
 }
