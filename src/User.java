@@ -1,4 +1,7 @@
+import utils.Utils;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.URL;
@@ -9,6 +12,7 @@ public class User {
     private String port;
     private String ip;
     private ServerSocket ss;
+    private String currentChat = null;
     private final Scanner reader = new Scanner(System.in);
 
     public void setup() {
@@ -36,6 +40,7 @@ public class User {
     }
 
     public void mainMenu() {
+        this.currentChat = null;
         Utils.clearTerminal();
         System.out.println("-----Main menu-----");
         System.out.println("1 - Start new chat");
@@ -48,6 +53,7 @@ public class User {
             case "1":
                 Utils.clearTerminal();
                 System.out.println("Starting new chat...");
+                //this.startNewChat();
                 break;
             case "2":
                 Utils.clearTerminal();
@@ -68,5 +74,13 @@ public class User {
                 System.out.println("Invalid option, ensure you only choose from the numbers 1-4");
                 this.mainMenu();
         }
+    }
+
+    private void startNewChat() throws IOException {
+        /* Takes an IP and Port to join a new chat - will change to a name to check with an external API to get the IP and port (for user discovery) */
+        System.out.println("Please input the IP and port for the user you would like to connect to:");
+        String ipPort = reader.next();
+        //ChatSocketClient webSocketClient = new ChatSocketClient(ipPort);
+        this.currentChat = ipPort;
     }
 }
