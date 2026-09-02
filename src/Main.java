@@ -8,11 +8,14 @@ void main() throws IOException {
     Scanner reader = new Scanner(System.in);
     String option = reader.nextLine();
     Chat chat;
+    System.out.println("Enter your name:");
+    String name = reader.nextLine();
 
-    if (Objects.equals(option, "server")) {
+
+    if ("server".equals(option)) {
         System.out.println("Starting server...");
         ChatSocketServer chatSocketServer = new ChatSocketServer(6667);
-        chat = new Chat(chatSocketServer);
+        chat = new Chat(chatSocketServer, name);
         chatSocketServer.setChat(chat);
         System.out.println("Created chat.");
     } else {
@@ -20,14 +23,15 @@ void main() throws IOException {
         String ip = reader.nextLine();
         System.out.println("Enter port:");
         int port = reader.nextInt();
-        chat = new Chat(ip, port);
+        chat = new Chat(ip, port, name);
         System.out.println("Created chat.");
     }
 
+    String myName = chat.getMyName();
     while (true) {
         String message = reader.nextLine();
-        String full_message = "from Jacob " + message;
-        System.out.println("Jacob: " + message);
+        System.out.print("\033[1A\033[2K");
+        String full_message = "from " + myName + " " + message;
         chat.sendMessage(full_message);
     }
 }

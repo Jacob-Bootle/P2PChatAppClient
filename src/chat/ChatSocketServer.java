@@ -20,8 +20,9 @@ public class ChatSocketServer implements ChatSocket {
         this.dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
     }
 
-    public void setChat(Chat chat) {
+    public void setChat(Chat chat) throws IOException {
         this.chat = chat;
+        this.sendMessage("hello " + this.chat.myName + " " + this.chat.myName);
     }
     public void sendMessage(String message) throws IOException {
         this.dataOutputStream.writeUTF(message);

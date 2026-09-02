@@ -16,6 +16,7 @@ public class ChatSocketClient implements ChatSocket {
         this.dataInputStream = new DataInputStream(this.socket.getInputStream());
         this.dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
         this.chat = chat;
+        this.sendMessage("hello " + this.chat.myName + " " +this.chat.myName);
     }
 
     @Override
