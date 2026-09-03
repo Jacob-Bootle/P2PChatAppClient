@@ -1,76 +1,120 @@
 package chat;
 
+import utils.Protocol;
+import utils.User;
+
 import java.io.IOException;
-import java.util.Vector;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Chat {
-    Vector<String> chatHistory = new Vector<>();
-    ChatSocket chatSocket;
-    String myName;
-    String counterpartName;
+public final class Chat {
+    public enum Direction {
+        INCOMING,
+        OUTGOING
+    }
 
-    public Chat(String ip, int port, String name) {
+    private final CopyOnWriteArrayList<String> chatHistory = new CopyOnWriteArrayList<>();
+    private final ChatSocket chatSocket;
+    private final User owner;
+    private final String myName;
+    private final String counterpartName;
+    private final Direction direction;
+    private final AtomicBoolean open = new AtomicBoolean(true);
+
+    public Chat(User owner, ChatSocket chatSocket, String myName, String counterpartName,
+                Direction direction) {
+        this.owner = owner;
+        this.chatSocket = chatSocket;
+        this.myName = Protocol.validateName(myName);
+        this.counterpartName = Protocol.validateName(counterpartName);
+        this.direction = direction;
+    }
+
+    public void sendMessage(String content) throws IOException {
+        if (content == null || content.isBlank()) {
+            return;
+        }
+        if (!isOpen()) {
+            throw new IOException("The chat with " + counterpartName + " is closed");
+        }
+
         try {
-            this.myName = name;
-            this.chatSocket = new ChatSocketClient(ip, port, this);
-            this.chatSocket.recieveMessage();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            chatSocket.sendMessage(Protocol.message(myName, content));
+            record(myName + ": " + content);
+        } catch (IOException exception) {
+            connectionLost();
+            throw exception;
         }
     }
 
-    public Chat(ChatSocket chatSocketServer, String name) {
-        this.chatSocket = chatSocketServer;
-        this.myName = name;
-        this.chatSocket.recieveMessage();
-    }
-
-    public void receiveMessage(String message) {
+    void receiveProtocolMessage(String message) {
         String[] parts = message.split(" ", 3);
-
         if (parts.length < 2) {
             return;
         }
+
         String command = parts[0];
         String sender = parts[1];
-        String content;
-        switch (command) {
-            case "from":
-                content = (parts.length == 3) ? parts[2] : "";
-                String printableMessage = sender + ": " + content;
-                System.out.println(printableMessage);
-                this.chatHistory.add(printableMessage);
-                break;
-            case "quit":
-                System.out.println(sender + " quit the chat.");
-                this.chatHistory.add(sender + " quit the chat.");
-                break;
-            case "hello":
-                content = (parts.length == 3) ? parts[2] : "";
-                this.counterpartName = content;
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void sendMessage(String message) throws IOException {
-        String[] parts = message.split(" ", 3);
-
-        if (parts.length > 0 && "from".equals(parts[0]) && (parts.length != 3 || "".equals(parts[2]))) {
+        if (!counterpartName.equals(sender)) {
+            owner.publishStatus("Ignored a message with the wrong sender name on the chat with "
+                    + counterpartName + ".");
             return;
         }
 
-        if (parts.length == 3) {
-            if ("from".equals(parts[0])) {
-                String printableMessage = parts[1] + ": " + parts[2];
-                this.chatHistory.add(printableMessage);
+        switch (command) {
+            case "from" -> {
+                String content = parts.length == 3 ? parts[2] : "";
+                record(sender + ": " + content);
             }
+            case "quit" -> remoteQuit();
+            default -> owner.publishStatus("Ignored an unknown chat command from " + sender + ".");
         }
-        this.chatSocket.sendMessage(message);
     }
 
-    public String getMyName() {
-        return this.myName;
+    private void remoteQuit() {
+        if (open.compareAndSet(true, false)) {
+            record("[system] " + counterpartName + " closed the chat.");
+        }
+        chatSocket.closeConnection();
+    }
+
+    void connectionLost() {
+        if (open.compareAndSet(true, false)) {
+            record("[system] Connection to " + counterpartName + " closed.");
+        }
+    }
+
+    public void close() {
+        if (!open.compareAndSet(true, false)) {
+            return;
+        }
+        try {
+            chatSocket.sendMessage(Protocol.quit(myName));
+        } catch (IOException ignored) {} finally {
+            chatSocket.closeConnection();
+        }
+        record("[system] You closed the chat with " + counterpartName + ".");
+    }
+
+    private void record(String printableMessage) {
+        chatHistory.add(printableMessage);
+        owner.chatUpdated(this, printableMessage);
+    }
+
+    public List<String> getChatHistory() {
+        return List.copyOf(chatHistory);
+    }
+
+    public String getCounterpartName() {
+        return counterpartName;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public boolean isOpen() {
+        return open.get() && chatSocket.isOpen();
     }
 }
