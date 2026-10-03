@@ -106,9 +106,9 @@ Alternatively, open the project in IntelliJ IDEA, select JDK 26, load the Maven 
 
 ### Start a direct chat
 
-1. Start the app on both computers and choose distinct names without spaces, such as `Jacob` and `User2`.
+1. Start the app on both computers and choose distinct names without spaces, such as `User1` and `User2`.
 2. On User2's computer, enter a listening port at startup, such as `52587`.
-3. On Jacob's computer, connect using User2's LAN IP address and listening port:
+3. On User1's computer, connect using User2's LAN IP address and listening port:
 
    ```text
    /connect 192.168.1.20 52587
@@ -118,7 +118,7 @@ Alternatively, open the project in IntelliJ IDEA, select JDK 26, load the Maven 
 4. On User2's computer, select the incoming conversation and reply:
 
    ```text
-   /open Jacob
+   /open User1
    Hello!
    ```
 
