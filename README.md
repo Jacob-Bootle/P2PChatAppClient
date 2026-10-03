@@ -80,8 +80,8 @@ Click any screenshot to view it at full size.
 Clone this repository and open its directory:
 
 ```sh
-git clone https://github.com/Jacob-Bootle/MultiThreadedChatAppClient.git
-cd MultiThreadedChatAppClient
+git clone https://github.com/Jacob-Bootle/P2PChatAppClient.git
+cd P2PChatAppClient
 ```
 
 Build the app and copy its runtime dependencies:
