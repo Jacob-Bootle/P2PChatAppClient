@@ -36,6 +36,13 @@ public final class User implements AutoCloseable {
         publishStatus("Listening for chats on port " + server.getPort() + ".");
     }
 
+    public int getListeningPort() {
+        if (servers.isEmpty()) {
+            throw new IllegalStateException("Start a chat listener with /listen <port> before /discovery");
+        }
+        return servers.getLast().getPort();
+    }
+
     public Chat connect(String ip, int port) throws IOException {
         ChatSocketClient connection = new ChatSocketClient(ip, port, name);
         Chat chat = new Chat(this, connection, name, connection.getCounterpartName(),
